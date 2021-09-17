@@ -17,6 +17,7 @@ import itertools
 import math
 import random
 import collections
+import os
 
 import discord
 import youtube_dl
@@ -26,6 +27,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import pprint
 
+DISCORD_TOKEN = os.environ.get("DISCORD_TOKEN")
 
 # Silence useless bug reports messages
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -182,13 +184,13 @@ class SongQueue(collections.deque):
         return self.qsize()
 
     def clear(self):
-        self._queue.clear()
+        self.clear()
 
     def shuffle(self):
         random.shuffle(self._queue)
 
     def remove(self, index: int):
-        del self._queue[index]
+        del self.queue[index]
 
 
 class VoiceState:
@@ -241,8 +243,10 @@ class VoiceState:
                 # reasons.
                 try:
                     async with timeout(180):  # 3 minutes
-                        print("playing song")
-                        self.current = await self.songs.popleft()
+                        print("playing")
+                        cur_song = self.songs.popleft()
+                        print(cur_song)
+                        self.current = cur_song
                 except asyncio.TimeoutError:
                     self.bot.loop.create_task(self.stop())
                     return
@@ -540,4 +544,4 @@ bot.add_cog(Music(bot))
 async def on_ready():
     print('Logged in as:\n{0.user.name}\n{0.user.id}'.format(bot))
 
-bot.run(bot key)
+bot.run(DISCORD_TOKEN)
